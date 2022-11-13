@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.android.codelabs.paging.PostUIItem
 import com.example.android.codelabs.paging.R
 import com.example.android.codelabs.paging.model.Repo
 
@@ -36,7 +37,7 @@ class RepoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val language: TextView = view.findViewById(R.id.repo_language)
     private val forks: TextView = view.findViewById(R.id.repo_forks)
 
-    private var repo: Repo? = null
+    private var repo: PostUIItem.RepoUIItem? = null
 
     init {
         view.setOnClickListener {
@@ -47,7 +48,7 @@ class RepoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         }
     }
 
-    fun bind(repo: Repo?) {
+    fun bind(repo: PostUIItem.RepoUIItem?) {
         if (repo == null) {
             val resources = itemView.resources
             name.text = resources.getString(R.string.loading)
@@ -60,7 +61,7 @@ class RepoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         }
     }
 
-    private fun showRepoData(repo: Repo) {
+    private fun showRepoData(repo: PostUIItem.RepoUIItem) {
         this.repo = repo
         name.text = repo.fullName
 

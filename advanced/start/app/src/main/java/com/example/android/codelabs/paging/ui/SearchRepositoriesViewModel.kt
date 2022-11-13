@@ -21,6 +21,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
+import com.example.android.codelabs.paging.PostUIItem
 import com.example.android.codelabs.paging.data.GithubRepository
 import com.example.android.codelabs.paging.model.Repo
 import kotlinx.coroutines.flow.*
@@ -45,7 +47,7 @@ class SearchRepositoriesViewModel(
      */
     val state: StateFlow<UiState>
 
-    val pagingDataFlow: Flow<PagingData<Repo>>
+    val pagingDataFlow: Flow<PagingData<PostUIItem>>
 
     /**
      * Processor of side effects from the UI which in turn feedback into [state]
@@ -75,8 +77,8 @@ class SearchRepositoriesViewModel(
                 // If the search query matches the scroll query, the user has scrolled
                 hasNotScrolledForCurrentSearch = search.query != scroll.currentQuery)
         }.stateIn(scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
-                initialValue = UiState())
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
+            initialValue = UiState())
 
         accept = { action ->
             viewModelScope.launch { actionStateFlow.emit(action) }
@@ -89,8 +91,29 @@ class SearchRepositoriesViewModel(
         super.onCleared()
     }
 
-    private fun searchRepo(queryString: String): Flow<PagingData<Repo>> =
-        repository.getSearchResultStream(queryString)
+    private fun searchRepo(queryString: String): Flow<PagingData<PostUIItem>> {
+
+        val response = repository.getSearchResultStream(queryString)
+        var isFirst = true
+        return response.map { post ->
+            post.map {
+                if (isFirst) {
+                    isFirst = false
+                    PostUIItem.Header(title = "test")
+
+                } else {
+                    PostUIItem.RepoUIItem(id = it.id,
+                        name = it.name,
+                        fullName = it.fullName,
+                        description = it.description,
+                        url = it.url,
+                        stars = it.stars,
+                        forks = it.forks,
+                        language = it.language)
+                }
+            }
+        }
+    }
 }
 
 sealed class UiAction {

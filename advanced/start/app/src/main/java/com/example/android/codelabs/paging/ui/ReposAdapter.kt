@@ -20,30 +20,59 @@ import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.example.android.codelabs.paging.PostUIItem
+import com.example.android.codelabs.paging.PostUIItem.Type.*
 import com.example.android.codelabs.paging.model.Repo
 
 /**
  * Adapter for the list of repositories.
  */
-class ReposAdapter : PagingDataAdapter<Repo, RepoViewHolder>(REPO_COMPARATOR) {
+class ReposAdapter : PagingDataAdapter<PostUIItem,  RecyclerView.ViewHolder>(REPO_COMPARATOR) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RepoViewHolder {
-        return RepoViewHolder.create(parent)
+
+    override fun getItemViewType(position: Int): Int = getItem(position)?.type!!.ordinal
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):  RecyclerView.ViewHolder {
+        return when (values()[viewType]){
+            HEADER -> {
+                HeaderViewHolder(
+                    binding = HeaderViewHolder.getLayoutInflated(parent)
+                )
+            }
+            POST -> {
+                RepoViewHolder.create(parent)
+            }
+        }
+
+      //  return RepoViewHolder.create(parent)
     }
 
-    override fun onBindViewHolder(holder: RepoViewHolder, position: Int) {
-        val repoItem = getItem(position)
+    override fun onBindViewHolder(holder:  RecyclerView.ViewHolder, position: Int) {
+       /* val repoItem = getItem(position)
         if (repoItem != null) {
             holder.bind(repoItem)
+        }*/
+
+        when (getItem(position)?.type) {
+
+            HEADER -> {
+                (holder as HeaderViewHolder).bind(getItem(position) as PostUIItem.Header)
+            }
+            POST -> {
+                (holder as RepoViewHolder).bind(getItem(position) as PostUIItem.RepoUIItem)
+            }
+            else ->{}
         }
+
     }
 
     companion object {
-        private val REPO_COMPARATOR = object : DiffUtil.ItemCallback<Repo>() {
-            override fun areItemsTheSame(oldItem: Repo, newItem: Repo): Boolean =
-                oldItem.fullName == newItem.fullName
+        private val REPO_COMPARATOR = object : DiffUtil.ItemCallback<PostUIItem>() {
+            override fun areItemsTheSame(oldItem: PostUIItem, newItem: PostUIItem): Boolean =
+                oldItem.type == newItem.type
 
-            override fun areContentsTheSame(oldItem: Repo, newItem: Repo): Boolean =
+            override fun areContentsTheSame(oldItem: PostUIItem, newItem: PostUIItem): Boolean =
                 oldItem == newItem
         }
     }
