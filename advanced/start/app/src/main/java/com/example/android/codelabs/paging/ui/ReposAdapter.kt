@@ -30,8 +30,7 @@ import com.example.android.codelabs.paging.model.Repo
  */
 class ReposAdapter : PagingDataAdapter<PostUIItem,  RecyclerView.ViewHolder>(REPO_COMPARATOR) {
 
-
-    override fun getItemViewType(position: Int): Int = getItem(position)?.type!!.ordinal
+    override fun getItemViewType(position: Int): Int = getItem(position)?.type?.ordinal ?: 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):  RecyclerView.ViewHolder {
         return when (values()[viewType]){
@@ -44,15 +43,9 @@ class ReposAdapter : PagingDataAdapter<PostUIItem,  RecyclerView.ViewHolder>(REP
                 RepoViewHolder.create(parent)
             }
         }
-
-      //  return RepoViewHolder.create(parent)
     }
 
     override fun onBindViewHolder(holder:  RecyclerView.ViewHolder, position: Int) {
-       /* val repoItem = getItem(position)
-        if (repoItem != null) {
-            holder.bind(repoItem)
-        }*/
 
         when (getItem(position)?.type) {
 
