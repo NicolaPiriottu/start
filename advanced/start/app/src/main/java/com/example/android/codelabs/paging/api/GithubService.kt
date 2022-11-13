@@ -37,7 +37,7 @@ interface GithubService {
     suspend fun searchRepos(
         @Query("q") query: String,
         @Query("page") page: Int,
-        @Query("per_page") itemsPerPage: Int
+        @Query("per_page") itemsPerPage: Int,
     ): RepoSearchResponse
 
     companion object {

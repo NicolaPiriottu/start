@@ -16,21 +16,13 @@
 
 package com.example.android.codelabs.paging.ui
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.liveData
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.android.codelabs.paging.data.GithubRepository
 import com.example.android.codelabs.paging.model.Repo
-import com.example.android.codelabs.paging.model.RepoSearchResult
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -62,89 +54,34 @@ class SearchRepositoriesViewModel(
 
 
     init {
-        /*val queryLiveData =
-            MutableLiveData(savedStateHandle.get(LAST_SEARCH_QUERY) ?: DEFAULT_QUERY)
-
-        state = queryLiveData
-            .distinctUntilChanged()
-            .switchMap { queryString ->
-                liveData {
-                    val uiState = repository.getSearchResultStream(queryString)
-                        .map {
-                            UiState(
-                                query = queryString,
-                                searchResult = it
-                            )
-                        }
-                        .asLiveData(Dispatchers.Main)
-                    emitSource(uiState)
-                }
-            }
-
-        accept = { action ->
-            when (action) {
-                is UiAction.Search -> queryLiveData.postValue(action.query)
-                is UiAction.Scroll -> if (action.shouldFetchMore) {
-                    val immutableQuery = queryLiveData.value
-                    if (immutableQuery != null) {
-                        viewModelScope.launch {
-                            repository.requestMore(immutableQuery)
-                        }
-                    }
-                }
-            }
-        }*/
-
         val initialQuery: String = savedStateHandle.get(LAST_SEARCH_QUERY) ?: DEFAULT_QUERY
         val lastQueryScrolled: String = savedStateHandle.get(LAST_QUERY_SCROLLED) ?: DEFAULT_QUERY
         val actionStateFlow = MutableSharedFlow<UiAction>()
-        val searches = actionStateFlow
-            .filterIsInstance<UiAction.Search>()
-            .distinctUntilChanged()
+        val searches = actionStateFlow.filterIsInstance<UiAction.Search>().distinctUntilChanged()
             .onStart { emit(UiAction.Search(query = initialQuery)) }
-        val queriesScrolled = actionStateFlow
-            .filterIsInstance<UiAction.Scroll>()
-            .distinctUntilChanged()
-            // This is shared to keep the flow "hot" while caching the last query scrolled,
-            // otherwise each flatMapLatest invocation would lose the last query scrolled,
-            .shareIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
-                replay = 1
-            )
-            .onStart { emit(UiAction.Scroll(currentQuery = lastQueryScrolled)) }
+        val queriesScrolled =
+            actionStateFlow.filterIsInstance<UiAction.Scroll>().distinctUntilChanged()
+                // This is shared to keep the flow "hot" while caching the last query scrolled,
+                // otherwise each flatMapLatest invocation would lose the last query scrolled,
+                .shareIn(scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
+                    replay = 1).onStart { emit(UiAction.Scroll(currentQuery = lastQueryScrolled)) }
 
-        pagingDataFlow = searches
-            .flatMapLatest { searchRepo(queryString = it.query) }
-            .cachedIn(viewModelScope)
+        pagingDataFlow =
+            searches.flatMapLatest { searchRepo(queryString = it.query) }.cachedIn(viewModelScope)
 
-        state = combine(
-            searches,
-            queriesScrolled,
-            ::Pair
-        ).map { (search, scroll) ->
-            UiState(
-                query = search.query,
-                lastQueryScrolled = scroll.currentQuery,
+        state = combine(searches, queriesScrolled, ::Pair).map { (search, scroll) ->
+            UiState(query = search.query, lastQueryScrolled = scroll.currentQuery,
                 // If the search query matches the scroll query, the user has scrolled
-                hasNotScrolledForCurrentSearch = search.query != scroll.currentQuery
-            )
-        }
-            .stateIn(
-                scope = viewModelScope,
+                hasNotScrolledForCurrentSearch = search.query != scroll.currentQuery)
+        }.stateIn(scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
-                initialValue = UiState()
-            )
+                initialValue = UiState())
 
         accept = { action ->
             viewModelScope.launch { actionStateFlow.emit(action) }
         }
     }
-
-    /* override fun onCleared() {
-         savedStateHandle[LAST_SEARCH_QUERY] = state.value?.query
-         super.onCleared()
-     }*/
 
     override fun onCleared() {
         savedStateHandle[LAST_SEARCH_QUERY] = state.value.query
@@ -156,19 +93,9 @@ class SearchRepositoriesViewModel(
         repository.getSearchResultStream(queryString)
 }
 
-/*
-private val UiAction.Scroll.shouldFetchMore
-    get() = visibleItemCount + lastVisibleItemPosition + VISIBLE_THRESHOLD >= totalItemCount
-*/
-
 sealed class UiAction {
     data class Search(val query: String) : UiAction()
 
-    /*data class Scroll(
-        val visibleItemCount: Int,
-        val lastVisibleItemPosition: Int,
-        val totalItemCount: Int
-    ) : UiAction()*/
     data class Scroll(val currentQuery: String) : UiAction()
 }
 
@@ -178,7 +105,6 @@ data class UiState(
     val hasNotScrolledForCurrentSearch: Boolean = false,
 )
 
-private const val VISIBLE_THRESHOLD = 5
 private const val LAST_SEARCH_QUERY: String = "last_search_query"
 private const val DEFAULT_QUERY = "Android"
 

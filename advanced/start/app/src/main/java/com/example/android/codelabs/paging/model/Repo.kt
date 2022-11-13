@@ -32,5 +32,5 @@ data class Repo(
     @field:SerializedName("html_url") val url: String,
     @field:SerializedName("stargazers_count") val stars: Int,
     @field:SerializedName("forks_count") val forks: Int,
-    @field:SerializedName("language") val language: String?
+    @field:SerializedName("language") val language: String?,
 )

@@ -40,7 +40,6 @@ private const val GITHUB_STARTING_PAGE_INDEX = 1
 class GithubRepository(private val service: GithubService) {
 
 
-
     // keep the list of all results received
     private val inMemoryCache = mutableListOf<Repo>()
 

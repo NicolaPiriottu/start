@@ -14,7 +14,7 @@ private const val GITHUB_STARTING_PAGE_INDEX = 1
 
 class GithubPagingSource(
     private val service: GithubService,
-    private val query: String
+    private val query: String,
 ) : PagingSource<Int, Repo>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Repo> {
