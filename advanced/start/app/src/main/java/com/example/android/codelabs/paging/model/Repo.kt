@@ -16,7 +16,7 @@
 
 package com.example.android.codelabs.paging.model
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 /**
  * Immutable model class for a Github repo that holds all the information about a repository.
@@ -25,12 +25,12 @@ import com.google.gson.annotations.SerializedName
  * This class also defines the Room repos table, where the repo [id] is the primary key.
  */
 data class Repo(
-    @field:SerializedName("id") val id: Long,
-    @field:SerializedName("name") val name: String,
-    @field:SerializedName("full_name") val fullName: String,
-    @field:SerializedName("description") val description: String?,
-    @field:SerializedName("html_url") val url: String,
-    @field:SerializedName("stargazers_count") val stars: Int,
-    @field:SerializedName("forks_count") val forks: Int,
-    @field:SerializedName("language") val language: String?,
+    @field:Json(name = "id") val id: Long,
+    @field:Json(name = "name") val name: String,
+    @field:Json(name = "full_name") val fullName: String,
+    @field:Json(name = "description") val description: String?,
+    @field:Json(name = "html_url") val url: String,
+    @field:Json(name = "stargazers_count") val stars: Int,
+    @field:Json(name = "forks_count") val forks: Int,
+    @field:Json(name = "language") val language: String?,
 )

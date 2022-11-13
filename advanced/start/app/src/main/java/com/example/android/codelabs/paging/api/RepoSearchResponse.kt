@@ -17,13 +17,13 @@
 package com.example.android.codelabs.paging.api
 
 import com.example.android.codelabs.paging.model.Repo
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 /**
  * Data class to hold repo responses from searchRepo API calls.
  */
 data class RepoSearchResponse(
-    @SerializedName("total_count") val total: Int = 0,
-    @SerializedName("items") val items: List<Repo> = emptyList(),
+    @Json(name = "total_count") val total: Int = 0,
+    @Json(name = "items") val items: List<Repo> = emptyList(),
     val nextPage: Int? = null,
 )
